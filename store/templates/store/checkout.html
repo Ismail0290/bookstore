@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout | BookStore{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Checkout</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Shipping Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_address" class="form-label">Address</label>
+                        {{ form.address }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_phone" class="form-label">Phone</label>
+                        {{ form.phone }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Place Order</button>
+                    <a href="{% url 'store:cart' %}" class="btn btn-outline-secondary ms-2">Back to Cart</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    {% for item in cart_items %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>
+                                <span>{{ item.book.title }}</span>
+                                <small class="text-muted d-block">Qty: {{ item.quantity }}</small>
+                            </div>
+                            <span>${{ item.get_cost }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="fw-bold">Total:</span>
+                    <span class="fw-bold">${{ total }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

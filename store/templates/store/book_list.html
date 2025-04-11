@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Books | BookStore{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Featured Books</h1>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    {% for book in books %}
+        <div class="col">
+            <div class="card h-100 book-card">
+                {% if book.image %}
+                    <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                {% else %}
+                    <div class="bg-light text-center p-5">
+                        <span class="text-muted">No Image</span>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text text-muted">{{ book.author }}</p>
+                    <p class="card-text fw-bold">${{ book.price }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'store:book_detail' book.id %}" class="btn btn-outline-secondary">Details</a>
+                        <form action="{% url 'store:add_to_cart' book.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No books available at the moment.</div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
