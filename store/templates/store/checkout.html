@@ -15,12 +15,12 @@
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="id_address" class="form-label">Address</label>
-                        {{ form.address }}
+                        <label for="address" class="form-label">Address</label>
+                        <textarea name="address" id="address" class="form-control" rows="3" required>{{ address }}</textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="id_phone" class="form-label">Phone</label>
-                        {{ form.phone }}
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" name="phone" id="phone" class="form-control" value="{{ phone }}" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Place Order</button>
                     <a href="{% url 'store:cart' %}" class="btn btn-outline-secondary ms-2">Back to Cart</a>

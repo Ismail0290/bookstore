@@ -1,28 +1,56 @@
-# Create your views here.
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegistrationForm, ProfileForm
+from django.contrib.auth.models import User
+from .models import Profile
 
 def register(request):
     if request.method == 'POST':
-        user_form = UserRegistrationForm(request.POST)
-        if user_form.is_valid():
-            user = user_form.save()
-            login(request, user)
-            return redirect('store:book_list')
-    else:
-        user_form = UserRegistrationForm()
-    return render(request, 'accounts/register.html', {'user_form': user_form})
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+        
+        # Basic validation
+        error = None
+        if not (username and email and password and password2):
+            error = "All fields are required."
+        elif password != password2:
+            error = "Passwords don't match."
+        elif User.objects.filter(username=username).exists():
+            error = "Username already exists."
+        elif User.objects.filter(email=email).exists():
+            error = "Email already exists."
+            
+        if error:
+            return render(request, 'accounts/register.html', {'error': error})
+            
+        # Create user
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+        login(request, user)
+        return redirect('store:book_list')
+    
+    return render(request, 'accounts/register.html')
 
 @login_required
 def profile(request):
     if request.method == 'POST':
-        profile_form = ProfileForm(request.POST, instance=request.user.profile)
-        if profile_form.is_valid():
-            profile_form.save()
-            return redirect('accounts:profile')
-    else:
-        profile_form = ProfileForm(instance=request.user.profile)
-    return render(request, 'accounts/profile.html', {'profile_form': profile_form})
+        address = request.POST.get('address')
+        phone = request.POST.get('phone')
+        
+        # Update profile
+        profile = request.user.profile
+        profile.address = address
+        profile.phone = phone
+        profile.save()
+        return redirect('accounts:profile')
+    
+    return render(request, 'accounts/profile.html')
 
+def custom_logout(request):
+    logout(request)
+    return redirect('store:book_list')

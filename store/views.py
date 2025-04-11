@@ -1,9 +1,7 @@
-# Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Book, Cart, CartItem, Order, OrderItem
-from .forms import OrderForm
 
 def book_list(request):
     books = Book.objects.all()
@@ -74,39 +72,53 @@ def checkout(request):
         return redirect('store:book_list')
     
     if request.method == 'POST':
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            order = form.save(commit=False)
-            order.user = request.user
-            order.save()
-            
-            for item in cart_items:
-                OrderItem.objects.create(
-                    order=order,
-                    book=item.book,
-                    price=item.book.price,
-                    quantity=item.quantity
-                )
-            
-            # Clear the cart
-            cart.delete()
-            
-            return redirect('store:order_complete', order_id=order.id)
-    else:
-        # Pre-fill with user profile data if available
-        initial = {}
-        if hasattr(request.user, 'profile'):
-            initial = {
-                'address': request.user.profile.address,
-                'phone': request.user.profile.phone
-            }
-        form = OrderForm(initial=initial)
+        address = request.POST.get('address')
+        phone = request.POST.get('phone')
+        
+        # Validate data
+        if not address or not phone:
+            messages.error(request, "Please provide both address and phone number.")
+            return render(request, 'store/checkout.html', {
+                'cart_items': cart_items,
+                'total': sum(item.get_cost() for item in cart_items),
+                'address': address,
+                'phone': phone
+            })
+        
+        # Create order
+        order = Order.objects.create(
+            user=request.user,
+            address=address,
+            phone=phone
+        )
+        
+        # Create order items
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                book=item.book,
+                price=item.book.price,
+                quantity=item.quantity
+            )
+        
+        # Clear the cart
+        cart.delete()
+        
+        return redirect('store:order_complete', order_id=order.id)
+    
+    # Pre-fill with user profile data if available
+    initial_address = ''
+    initial_phone = ''
+    if hasattr(request.user, 'profile'):
+        initial_address = request.user.profile.address or ''
+        initial_phone = request.user.profile.phone or ''
     
     total = sum(item.get_cost() for item in cart_items)
     return render(request, 'store/checkout.html', {
         'cart_items': cart_items,
         'total': total,
-        'form': form
+        'address': initial_address,
+        'phone': initial_phone
     })
 
 @login_required

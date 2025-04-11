@@ -13,12 +13,12 @@
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="id_address" class="form-label">Address</label>
-                        {{ profile_form.address }}
+                        <label for="address" class="form-label">Address</label>
+                        <textarea name="address" id="address" class="form-control" rows="3">{{ request.user.profile.address }}</textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="id_phone" class="form-label">Phone</label>
-                        {{ profile_form.phone }}
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" name="phone" id="phone" class="form-control" value="{{ request.user.profile.phone }}">
                     </div>
                     <button type="submit" class="btn btn-primary">Update Profile</button>
                 </form>

@@ -1,7 +1,4 @@
 from django.contrib import admin
-
-# Register your models here.
-
 from .models import Book, Cart, CartItem, Order, OrderItem
 
 @admin.register(Book)
