@@ -1,0 +1,20 @@
+
+services:
+  web:
+    build: .
+    command: gunicorn bookstore.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/code
+    expose:
+      - "8000"
+
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./static:/static  # Serve collected static files
+    depends_on:
+      - web
